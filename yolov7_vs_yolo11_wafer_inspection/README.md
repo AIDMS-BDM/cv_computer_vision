@@ -1,7 +1,5 @@
 # YOLOv7 與 YOLO11 實例分割技術特色比較：半導體晶圓瑕疵檢測
 
-**🌐 線上瀏覽網頁版：<https://aidms-bdm.github.io/document/yolov7_vs_yolo11_wafer_inspection/>**
-
 比較 YOLOv7 與 YOLO11 兩代模型在**實例分割（Instance Segmentation）** 上的技術特色，並說明如何應用到半導體晶圓瑕疵檢測。內容以製造業客戶的 **QC 產線主管與製程／設備工程師**為對象，重點放在產線指標、選型與導入步驟，不談演算法細節。
 
 ![YOLOv7 與 YOLOv11 技術特色一頁圖](yolov7_vs_yolo11_infographic.png)
