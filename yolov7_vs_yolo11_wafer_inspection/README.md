@@ -2,7 +2,7 @@
 
 **🌐 線上瀏覽網頁版：<https://aidms-bdm.github.io/document_cv_computer_vision_web/yolov7_vs_yolo11_wafer_inspection/>**
 
-這份資料比較 YOLOv7 與 YOLO11 兩代模型在**實例分割（Instance Segmentation）** 上的技術特色，並說明如何應用到半導體晶圓瑕疵檢測。內容以製造業客戶的 **QC 產線主管與製程／設備工程師**為對象，重點放在產線指標、選型與導入步驟，不談演算法細節。
+比較 YOLOv7 與 YOLO11 兩代模型在**實例分割（Instance Segmentation）** 上的技術特色，並說明如何應用到半導體晶圓瑕疵檢測。內容以製造業客戶的 **QC 產線主管與製程／設備工程師**為對象，重點放在產線指標、選型與導入步驟，不談演算法細節。
 
 ![YOLOv7 與 YOLOv11 技術特色一頁圖](yolov7_vs_yolo11_infographic.png)
 
@@ -10,9 +10,9 @@
 
 | 檔案 | 格式 | 用途 |
 |---|---|---|
-| [yolov7_vs_yolo11_wafer_inspection_v2.pptx](yolov7_vs_yolo11_wafer_inspection_v2.pptx) | PowerPoint，13 頁，含講者備註 | 對客戶簡報 |
-| [yolov7_vs_yolo11_wafer_inspection_v2.html](yolov7_vs_yolo11_wafer_inspection_v2.html) | 單一 HTML 網頁，含麗臺科技與 AIDMS Logo | 會後提供給客戶閱讀，或以 Email 寄送 |
-| [yolov7_vs_yolo11_infographic.png](yolov7_vs_yolo11_infographic.png) | 一頁式資訊圖（1800 × 2400） | 快速摘要、社群或文宣使用 |
+| [yolov7_vs_yolo11_wafer_inspection_v2.pptx](yolov7_vs_yolo11_wafer_inspection_v2.pptx) | PowerPoint |
+| [yolov7_vs_yolo11_wafer_inspection_v2.html](yolov7_vs_yolo11_wafer_inspection_v2.html) | 單一 HTML 網頁，提供給客戶閱讀 |
+| [yolov7_vs_yolo11_infographic.png](yolov7_vs_yolo11_infographic.png) | 一頁式資訊圖（1800 × 2400） | 摘要、行銷活動文宣使用 |
 
 > HTML 檔已把 Logo 圖片內嵌在檔案中，下載後直接用瀏覽器開啟即可，不需要其他檔案。
 > 線上網頁版放在公開的 [AIDMS-BDM/document_cv_computer_vision_web](https://github.com/AIDMS-BDM/document_cv_computer_vision_web) repo，透過 GitHub Pages 發布，**任何拿到網址的人都看得到**。修改本資料夾的 HTML 後，需同步更新該 repo 的 `yolov7_vs_yolo11_wafer_inspection/index.html`。
