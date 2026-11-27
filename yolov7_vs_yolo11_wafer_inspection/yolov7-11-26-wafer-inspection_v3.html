@@ -169,7 +169,7 @@
       <div>
         <span class="eyebrow">半導體晶圓瑕疵檢測 · AI 視覺技術簡報</span>
         <h1>YOLOv7、YOLO11 與 YOLO26 實例分割（Instance Segmentation）技術特色比較說明</h1>
-        <p class="lead">比較 YOLOv7、YOLO11 與最新的 YOLO26 三代模型在這件事上的差異，以及導入時要注意的地方。</p>
+        <p class="lead">比較 YOLOv7、YOLO11 與最新的 YOLO26 三代模型，在晶圓瑕疵實例分割（逐顆描出輪廓、量測面積與長度、判斷類別）上的差異，以及導入產線時要注意的地方。</p>
         <nav class="toc" aria-label="目錄">
           <a href="#why">為什麼用實例分割</a>
           <a href="#defects">瑕疵類型對應</a>
@@ -244,7 +244,7 @@
             <th>瑕疵類型</th>
             <th>影像特徵</th>
             <th>技術難點</th>
-            <th>對模型的需求</th>
+            <th>QC 要求模型做到</th>
           </tr>
         </thead>
         <tbody>
@@ -252,31 +252,31 @@
             <td><strong>微粒（Particle）</strong></td>
             <td>數個到數十個像素的小點</td>
             <td>極小目標，容易被當成背景雜訊</td>
-            <td>小物件敏感度（如 YOLO26 的小目標標籤分配 STAL）、高解析輸入或切圖（tiling）推論</td>
+            <td>穩定抓到極小瑕疵、避免漏檢；YOLO26 對小目標有特別強化</td>
           </tr>
           <tr>
             <td><strong>刮痕（Scratch）</strong></td>
             <td>細長、方向任意、可能斷續</td>
-            <td>長寬比極端，預設 anchor 形狀難以匹配</td>
-            <td>Anchor-free 設計、精準的遮罩邊界，必要時搭配旋轉框（OBB）</td>
+            <td>形狀細長，用外框估算會嚴重高估面積</td>
+            <td>依實際輪廓量出長度與方向，避免過殺</td>
           </tr>
           <tr>
             <td><strong>邊緣崩缺（Edge Chipping / Crack）</strong></td>
             <td>出現在晶圓邊緣，形狀不規則</td>
             <td>背景是晶圓外緣，對比度變化大</td>
-            <td>對不規則輪廓的遮罩品質（如 YOLO26 使用多尺度資訊的 proto 模組）</td>
+            <td>輪廓描得準，崩缺面積與深度才量得準</td>
           </tr>
           <tr>
             <td><strong>圖形缺陷（Pattern Defect）</strong></td>
             <td>線路斷線、短路、橋接</td>
             <td>正常圖形重複且複雜，瑕疵僅是局部差異</td>
-            <td>上下文理解（注意力機制）、低誤報</td>
+            <td>分辨正常圖形與局部異常，壓低誤報</td>
           </tr>
           <tr>
             <td><strong>殘留／污漬（Residue / Stain）</strong></td>
             <td>低對比、邊界模糊的區塊</td>
             <td>邊界不清，人工標註也常不一致</td>
-            <td>對低對比特徵的辨識，以及一致的標註規範</td>
+            <td>低對比也能辨識，並搭配一致的瑕疵判定標準</td>
           </tr>
         </tbody>
       </table>
@@ -285,43 +285,40 @@
 
   <!-- 3 -->
   <section id="tech">
-    <h2><span class="num">03</span>三代模型的技術亮點（用產線語言說明）</h2>
-    <p class="sub">三代模型強化的方向不同：YOLOv7 主要改良訓練方法，YOLO11 把重點放在輕量化與工程落地，YOLO26 則進一步走向端到端推論、小目標偵測與分割品質提升。</p>
+    <h2><span class="num">03</span>模型的技術亮點</h2>
+    <p class="sub">三代模型改進的方向不同：YOLOv7 著重訓練穩定，YOLO11 著重輕量快速、容易導入，YOLO26 著重低延遲、小瑕疵檢出與尺寸量測精度。</p>
     <div class="grid-3">
       <div class="card v7">
-        <h3><span class="tag v7">YOLOv7</span>2022 · 中研院團隊</h3>
+        <h3><span class="tag v7">2022</span>YOLOv7</h3>
         <ul class="clean small">
-          <li><strong>E-ELAN 骨幹網路：</strong>網路加深時仍能穩定學習。<span class="muted">→ 在瑕疵樣本有限時，模型也比較不容易訓練失敗。</span></li>
-          <li><strong>重參數化卷積（RepConv）：</strong>訓練時使用多分支結構，部署時合併成單一卷積。<span class="muted">→ 準確度提升，推論速度不受影響。</span></li>
-          <li><strong>主／輔助頭標籤分配（Lead-guided Assignment）：</strong>以輔助頭加強中間層的學習。<span class="muted">→ 提高對模糊瑕疵的召回率。</span></li>
-          <li><strong>實例分割為「外掛」：</strong>以 BlendMask 或 prototype mask 分支實作，需切換程式碼分支並修改設定檔。</li>
-          <li><strong>Anchor-based：</strong>預設框形狀以 COCO 一般物件為準，處理細長刮痕通常要重新聚類 anchor。</li>
+          <li><strong>訓練穩定：</strong>瑕疵樣本有限時，也比較容易訓練出可用的模型。</li>
+          <li><strong>準確度提升、速度不受影響：</strong>部署時模型結構會自動簡化，不拖慢產線節拍。</li>
+          <li><strong>模糊瑕疵檢出較佳：</strong>對邊界不清的瑕疵有較好的檢出率。</li>
+          <li><strong>限制：</strong>分割功能需額外整合；細長刮痕需額外調整參數，導入與維護工時較高。</li>
         </ul>
       </div>
       <div class="card v11">
-        <h3><span class="tag v11">YOLO11</span>2024 · Ultralytics</h3>
+        <h3><span class="tag v11">2024</span>YOLO11</h3>
         <ul class="clean small">
-          <li><strong>C3k2 模組：</strong>以較小卷積核組成的輕量模組。<span class="muted">→ 同等準確度下，參數量與運算量更少，單機可處理更多影像。</span></li>
-          <li><strong>C2PSA 空間注意力：</strong>讓模型聚焦在影像中「不一樣的地方」。<span class="muted">→ 適合在重複的電路圖形中找出局部異常，對小微粒與低對比瑕疵也有幫助。</span></li>
-          <li><strong>Anchor-free 解耦偵測頭：</strong>不預設框形狀，分類與定位分開學習。<span class="muted">→ 細長刮痕、不規則崩缺都不需要額外調 anchor。</span></li>
-          <li><strong>原生實例分割：</strong>n / s / m / l / x 五種規模的 <code>-seg</code> 模型，可依產線節拍與硬體選擇。</li>
-          <li><strong>一鍵匯出 TensorRT / ONNX / OpenVINO：</strong>從訓練到上線 GPU 推論的流程短，方便整合到既有 AOI 機台或邊緣 GPU 主機。</li>
+          <li><strong>輕量快速：</strong>同樣準確度下運算量更少，一台 GPU 可支援更多機台。</li>
+          <li><strong>善於找出局部異常：</strong>能在重複的電路圖形中找出不一樣的地方，對小微粒與低對比瑕疵有幫助。</li>
+          <li><strong>不規則形狀免調整：</strong>細長刮痕、不規則崩缺不需額外調整參數即可處理。</li>
+          <li><strong>原生支援分割：</strong>提供五種模型規模，可依產線節拍與硬體選擇；訓練到上線產線的流程短。</li>
         </ul>
       </div>
       <div class="card v26">
-        <h3><span class="tag v26">YOLO26</span>2025 · Ultralytics</h3>
+        <h3><span class="tag v26">2025</span>YOLO26</h3>
         <ul class="clean small">
-          <li><strong>端到端免 NMS 推論：</strong>可選的一對一偵測頭直接輸出結果，不需要非極大值抑制（NMS）後處理。<span class="muted">→ 推論延遲更低也更穩定，部署到邊緣裝置或機台內嵌更單純。</span></li>
-          <li><strong>移除 DFL：</strong>簡化偵測頭結構。<span class="muted">→ 匯出到 TensorRT、ONNX 與各種邊緣晶片更容易；官方指 n 版 CPU ONNX 推論比 YOLO11n 最多快 43%，沒有 GPU 的站點也能跑。</span></li>
-          <li><strong>STAL 小目標標籤分配＋ProgLoss：</strong>提高小物件的正樣本覆蓋，並讓訓練重心逐步轉向推論時使用的偵測頭。<span class="muted">→ 直接對應晶圓上只有幾個像素的微粒。</span></li>
-          <li><strong>實例分割專屬強化：</strong>加入語意分割損失幫助收斂，並升級使用多尺度資訊的 proto 模組。<span class="muted">→ 遮罩邊界更準，面積與長度量測更可靠；官方論文指 COCO Mask AP 比 YOLO11 最多高 3.7。</span></li>
-          <li><strong>MuSGD 優化器：</strong>結合 SGD 與 Muon，借鏡大型語言模型的訓練方法。</li>
+          <li><strong>小瑕疵檢出強化：</strong>針對極小目標加強學習，直接對應晶圓上只有幾個像素的微粒，降低漏檢。</li>
+          <li><strong>輪廓更精準：</strong>瑕疵邊界描得更準，面積、長度量測更可靠；公開基準上輪廓準確度比 YOLO11 最多高 3.7 分。</li>
+          <li><strong>延遲低且穩定：</strong>輸出結果不需額外後處理，檢測時間更可預期，適合機台內嵌與邊緣裝置。</li>
+          <li><strong>沒有 GPU 也能跑：</strong>小模型在一般 CPU 上的推論速度比 YOLO11 最多快 43%。</li>
         </ul>
       </div>
     </div>
 
-    <h3 style="margin-top:28px">YOLO11 與 YOLO26 實例分割模型規格（官方 COCO 基準）</h3>
-    <p class="small muted">COCO 為通用影像資料集，數字用於比較模型規模之間的相對差異，<strong>不代表晶圓影像上的實際表現</strong>。實際準確度須以客戶自有樣本驗證。</p>
+    <h3 style="margin-top:28px">模型規模怎麼選（公開基準數據）</h3>
+    <p class="small muted"><strong>Box mAP</strong>：找到並框出瑕疵的準確度；<strong>Mask mAP</strong>：描出瑕疵輪廓的準確度，直接影響面積與長度量測。兩者都是 0～100 分，越高越好。數據來自公開的通用影像資料集（COCO），用於比較模型之間的相對差異，<strong>不代表晶圓影像上的實際表現</strong>，實際準確度須以客戶自有樣本驗證。</p>
     <div class="table-wrap">
       <table class="spec">
         <thead>
@@ -349,13 +346,13 @@
         </tbody>
       </table>
     </div>
-    <p class="small muted" style="margin-top:8px">註：數據皆為 Ultralytics 官方公布的 COCO val2017 結果（輸入 640）。YOLO26 為端到端（免 NMS）模式，NVIDIA T4 TensorRT10 延遲由 n 版 2.1 ms 至 x 版 16.4 ms。同規模下，YOLO26 的參數量與 YOLO11 相近，Mask mAP 高 1.9～3.2。YOLOv7-seg 的 Mask mAP 約與 YOLO11m／l-seg 同級，但參數量與運算量明顯較大；各版本官方測試條件不完全相同，僅供參考。</p>
+    <p class="small muted" style="margin-top:8px">註：同規模下，YOLO26 的模型大小與 YOLO11 相近，輪廓準確度（Mask mAP）高 1.9～3.2 分；在 NVIDIA T4 GPU 上，每張影像的檢測時間由 n 版 2.1 ms 至 x 版 16.4 ms。YOLOv7 的輪廓準確度約與 YOLO11 m／l 同級，但模型較大、運算量較高。各版本的官方測試條件不完全相同，僅供參考。</p>
   </section>
 
   <!-- 4 -->
   <section id="compare">
     <h2><span class="num">04</span>功能與導入面比較</h2>
-    <p class="sub">對工廠來說，除了模型準確度，還要評估能不能長期維護、能不能接上既有系統。</p>
+    <p class="sub">對工廠來說，除了準確度，還要看能否涵蓋多種檢測任務、工程師能否自行維護，以及能否順利接上既有產線。</p>
     <div class="table-wrap">
       <table>
         <thead>
@@ -368,40 +365,28 @@
         </thead>
         <tbody>
           <tr>
-            <td><strong>支援任務</strong></td>
-            <td>偵測、姿態、實例分割，分散在不同程式分支</td>
-            <td>偵測、實例分割、分類、旋轉框（OBB）、姿態、追蹤，使用同一套 API</td>
-            <td>延續 YOLO11 的任務，另新增語意分割與單目深度估計，同一套 API</td>
+            <td><strong>可涵蓋的檢測任務</strong></td>
+            <td>瑕疵定位與輪廓分割，功能分散，需各自整合</td>
+            <td>瑕疵定位、輪廓分割、分類、方向判斷、追蹤，用同一套工具完成</td>
+            <td>延續 YOLO11 的任務，並新增大面積區域分割</td>
           </tr>
           <tr>
-            <td><strong>晶圓檢測延伸應用</strong></td>
-            <td>以分割為主，其他任務需自行整合</td>
-            <td>分割量測瑕疵、OBB 標出刮痕方向、分類模型做 die 級判定，可在同一框架內組合</td>
-            <td>與 YOLO11 相同的組合方式，並可用小目標強化處理微粒類瑕疵</td>
+            <td><strong>晶圓檢測應用</strong></td>
+            <td>以輪廓量測為主，其他判定需另外開發</td>
+            <td>量測瑕疵尺寸、標出刮痕方向、做 die 級 Pass/Fail 判定，可在同一套流程完成</td>
+            <td>與 YOLO11 相同，且微粒等小瑕疵的檢出更好</td>
           </tr>
           <tr>
-            <td><strong>訓練與調參門檻</strong></td>
-            <td>研究型程式碼，需熟悉 PyTorch 與設定檔</td>
-            <td>一行指令即可訓練，工程師較易接手</td>
-            <td>與 YOLO11 相同的指令與資料格式，既有標註資料可直接沿用</td>
+            <td><strong>工程師維護門檻</strong></td>
+            <td>需熟悉研究型程式碼，再訓練與調整較費工</td>
+            <td>一行指令即可再訓練，製程工程師容易接手</td>
+            <td>操作方式與 YOLO11 相同，既有標註資料可直接沿用</td>
           </tr>
           <tr>
-            <td><strong>部署到產線 GPU</strong></td>
-            <td>ONNX／TensorRT 轉換需自行處理或依賴社群腳本</td>
-            <td>內建 <code>export</code>，可直接輸出 TensorRT（FP16／INT8）</td>
-            <td>內建 <code>export</code>，可選免 NMS 的端到端輸出，後處理更單純；支援更多邊緣晶片格式</td>
-          </tr>
-          <tr>
-            <td><strong>長期維護</strong></td>
-            <td>原團隊已轉往後續研究，更新頻率低</td>
-            <td>持續維護，文件與社群資源豐富</td>
-            <td>Ultralytics 目前的最新版本，社群案例與第三方工具支援仍在累積</td>
-          </tr>
-          <tr>
-            <td><strong>授權（法務必看）</strong></td>
-            <td><span class="tag warn">GPL-3.0</span>修改後散布須開放原始碼</td>
-            <td><span class="tag warn">AGPL-3.0</span>透過網路提供服務也適用開源義務；商業封閉部署通常需購買 Ultralytics 企業授權</td>
-            <td><span class="tag warn">AGPL-3.0</span>與 YOLO11 相同，另有 Ultralytics 企業授權可選</td>
+            <td><strong>接上產線</strong></td>
+            <td>需自行轉換成產線推論格式</td>
+            <td>可直接轉成 GPU 加速格式，部署到產線主機</td>
+            <td>可直接轉換部署，輸出不需額外後處理，檢測時間更穩定；支援更多邊緣硬體</td>
           </tr>
         </tbody>
       </table>
@@ -411,31 +396,31 @@
   <!-- 5 -->
   <section id="kpi">
     <h2><span class="num">05</span>對 QC 關鍵指標的影響</h2>
-    <p class="sub">把模型特性換算成產線主管關心的指標（實際幅度依產品、光學條件與樣本量而定）。</p>
+    <p class="sub">從品質管理的角度看，AI 模型的價值最終要反映在四項關鍵指標上：不良品流出、良品誤判、全檢產能，以及判定的一致性與人力。實際改善幅度依產品、光學條件與樣本量而定，須以 POC 數據確認。</p>
     <div class="grid-4">
       <div class="card kpi">
         <div class="big">漏檢率 ↓</div>
         <div class="label">Escape Rate</div>
-        <p class="small muted">YOLO11 的注意力機制與 anchor-free 設計，加上 YOLO26 針對小目標的 STAL，都能提升對小微粒與細刮痕的召回率，減少瑕疵流到下游。</p>
+        <p class="small muted">減少不良品流到後段製程或客戶端，降低客訴與退貨風險。小瑕疵的檢出能力是關鍵，新一代模型在這方面有明顯強化。</p>
       </div>
       <div class="card kpi">
         <div class="big">過殺率 ↓</div>
         <div class="label">Overkill Rate</div>
-        <p class="small muted">像素級面積與長度量測取代外框估算，避免把小瑕疵誤判為 NG；YOLO26 升級的 proto 模組讓遮罩邊界更準，量測誤差更小。</p>
+        <p class="small muted">依瑕疵實際輪廓量測面積與長度，取代外框估算，減少良品被誤判報廢，直接降低良率損失。</p>
       </div>
       <div class="card kpi">
-        <div class="big">檢測節拍 ↑</div>
+        <div class="big">全檢產能 ↑</div>
         <div class="label">UPH / Takt Time</div>
-        <p class="small muted">模型更輕量並以 TensorRT 加速，單台 GPU 可負擔更多機台；YOLO26 免 NMS 後處理，延遲更低也更穩定。</p>
+        <p class="small muted">檢測速度快且時間穩定，能跟上產線節拍做 100% 全檢，不必退回抽檢。</p>
       </div>
       <div class="card kpi">
-        <div class="big">人工複判 ↓</div>
-        <div class="label">Review Loading</div>
-        <p class="small muted">判定一致且可量化，人工只需複判信心分數落在灰色地帶的案例，釋放 QC 人力。</p>
+        <div class="big">判定一致性 ↑</div>
+        <div class="label">Consistency &amp; Review Loading</div>
+        <p class="small muted">同一標準判定、不受人員與班別影響；人工只需複判灰色地帶案例。每筆判定都有量測數據可追溯，方便稽核與 SPC 分析。</p>
       </div>
     </div>
     <div class="callout warn">
-      <strong>工程提醒：</strong>晶圓影像常是高解析度大圖（數千至上萬像素），微粒可能只有幾個像素。無論選哪一代模型，都建議採用<strong>切圖推論（tiling／SAHI）</strong>，並針對瑕疵樣本少、類別不平衡的情況規劃資料增強與主動學習（active learning）流程。
+      <strong>導入提醒：</strong>晶圓影像常是高解析度大圖，微粒可能只有幾個像素。無論選哪一代模型，都建議把大圖切成小塊檢測，並持續補充稀有瑕疵的樣本，讓模型對少見瑕疵也有足夠的判斷依據。
     </div>
   </section>
 
@@ -449,32 +434,30 @@
         <ul class="clean small">
           <li>新建 AOI 產線或首次導入 AI 瑕疵檢測</li>
           <li>微粒等小瑕疵占比高，漏檢是主要痛點</li>
-          <li>部署在邊緣裝置、機台內嵌，或需要穩定的低延遲</li>
+          <li>部署在邊緣裝置、機台內嵌，或需要穩定的檢測時間</li>
           <li>建議起點：<strong>YOLO26m-seg 為主、YOLO11m-seg 為對照</strong>，用同一份驗證集比較</li>
-          <li class="muted">授權與 YOLO11 相同（AGPL-3.0），商業封閉部署前請先確認授權方案</li>
         </ul>
       </div>
       <div class="card v11">
         <h3><span class="tag v11">成熟穩定</span>選 YOLO11-seg</h3>
         <ul class="clean small">
           <li>團隊已熟悉 YOLO11，或既有流程以 YOLO11 建置</li>
-          <li>需要較多社群案例與第三方工具支援</li>
+          <li>需要較多已驗證的產業應用案例</li>
           <li>在自有晶圓資料上，YOLO26 未見明顯優勢</li>
-          <li>產線節拍要求高，需要 TensorRT 加速的線上全檢</li>
+          <li>產線節拍要求高，需要 GPU 加速的線上全檢</li>
         </ul>
       </div>
       <div class="card v7">
         <h3><span class="tag v7">特定情境</span>保留或選用 YOLOv7</h3>
         <ul class="clean small">
           <li>既有檢測系統已以 YOLOv7 建置且運作穩定，遷移與重新驗證成本高</li>
-          <li>研發單位要深入修改模型結構或標籤分配機制</li>
-          <li>授權策略上偏好 GPL-3.0</li>
+          <li>現行漏檢率與過殺率已符合品質規格</li>
           <li class="muted">建議：可並行用 YOLO26 或 YOLO11 做 A/B 測試，以同一批驗證集比較漏檢與過殺，再決定是否升級</li>
         </ul>
       </div>
     </div>
     <div class="callout">
-      <strong>為什麼不直接全部換成 YOLO26？</strong>COCO 上的提升不保證在晶圓影像上同樣成立，而且新版本的社群案例與第三方工具支援仍在累積。建議用自有樣本同時測試 YOLO26 與 YOLO11，再依漏檢率、過殺率與延遲決定。
+      <strong>為什麼不直接全部換成 YOLO26？</strong>公開資料集上的提升，不保證在晶圓影像上同樣成立，產業應用案例也還在累積。建議用自有樣本同時驗證 YOLO26 與 YOLO11，再依漏檢率、過殺率、判定一致性與檢測時間決定。
     </div>
   </section>
 
@@ -495,7 +478,7 @@
       </li>
       <li>
         <strong>POC 模型訓練與驗證</strong>
-        <div class="small">以 YOLO26m-seg 與 YOLO11m-seg 同時訓練，必要時與 YOLOv7-seg 對照；依瑕疵類別分別看召回率、精確率與遮罩品質。</div>
+        <div class="small">以 YOLO26m-seg 與 YOLO11m-seg 同時訓練，必要時與 YOLOv7-seg 對照；依瑕疵類別分別統計漏檢率、過殺率與尺寸量測誤差。</div>
         <div class="when">產出：漏檢率、過殺率、推論速度報告</div>
       </li>
       <li>
@@ -505,7 +488,7 @@
       </li>
       <li>
         <strong>正式部署與系統整合</strong>
-        <div class="small">匯出 TensorRT 引擎（YOLO26 可採免 NMS 的端到端輸出）部署到產線 GPU 伺服器或邊緣主機，檢測結果（類別、座標、面積、wafer map）寫回 MES 與 SPC。</div>
+        <div class="small">將模型部署到產線 GPU 伺服器或邊緣主機，檢測結果（類別、座標、面積、wafer map）寫回 MES 與 SPC。</div>
         <div class="when">產出：線上檢測服務、wafer map 報表</div>
       </li>
       <li>
@@ -524,8 +507,8 @@
       <img class="leadtek" src="data:image/png;base64,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" alt="Leadtek 麗臺科技">
       <img class="aidms" src="data:image/png;base64,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" alt="AIDMS">
     </div>
-    <p>資料來源：YOLOv7 論文（Wang, Bochkovskiy, Liao, 2022）與官方程式庫；Ultralytics YOLO11 與 YOLO26 官方文件公布之 COCO val2017 數據（輸入尺寸 640，YOLO26 為端到端模式）；Ultralytics YOLO26 論文（arXiv:2606.03748）。</p>
-    <p>本文所述產線效益為技術特性推論，實際效果需以客戶自有晶圓影像與檢測條件驗證。授權內容僅供參考，請以各專案官方授權條款與法務意見為準。</p>
+    <p>資料來源：YOLOv7 論文（2022）；YOLO11 與 YOLO26 官方技術文件公布之 COCO val2017 數據（輸入尺寸 640）；YOLO26 論文（arXiv:2606.03748）。</p>
+    <p>本文所述產線效益為技術特性推論，實際效果需以客戶自有晶圓影像與檢測條件驗證。</p>
   </div>
 </footer>
 
