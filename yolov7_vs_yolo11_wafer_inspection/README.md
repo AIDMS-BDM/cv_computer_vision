@@ -2,6 +2,8 @@
 
 [瀏覽 HTML 網頁](https://aidms-bdm.github.io/cv_computer_vision/yolov7_vs_yolo11_wafer_inspection/yolov7_vs_yolo11_wafer_inspection_v2.html)
 
+[瀏覽 v3 HTML 網頁（加入 YOLO26 比較）](https://aidms-bdm.github.io/cv_computer_vision/yolov7_vs_yolo11_wafer_inspection/yolov7-11-26-wafer-inspection_v3.html)
+
 比較 YOLOv7 與 YOLO11 兩代模型在**實例分割（Instance Segmentation）** 上的技術特色，並說明如何應用到半導體晶圓瑕疵檢測。內容以製造業客戶的 **QC 產線主管與製程／設備工程師**為對象，重點放在產線指標、選型與導入步驟，不談演算法細節。
 
 ![YOLOv7 與 YOLOv11 技術特色一頁圖](yolov7_vs_yolo11_infographic.png)
@@ -12,6 +14,7 @@
 |---|---|---|
 | [yolov7_vs_yolo11_wafer_inspection_v2.pptx](yolov7_vs_yolo11_wafer_inspection_v2.pptx) | PowerPoint |
 | [yolov7_vs_yolo11_wafer_inspection_v2.html](yolov7_vs_yolo11_wafer_inspection_v2.html) | 單一 HTML 網頁，提供給客戶閱讀 |
+| [yolov7-11-26-wafer-inspection_v3.html](yolov7-11-26-wafer-inspection_v3.html) | 單一 HTML 網頁，加入 YOLO26 比較 | 提供給客戶閱讀 |
 | [yolov7_vs_yolo11_infographic.png](yolov7_vs_yolo11_infographic.png) | 一頁式資訊圖（1800 × 2400） | 摘要、行銷活動文宣使用 |
 
 > HTML 檔已把 Logo 圖片內嵌在檔案中，下載後直接用瀏覽器開啟即可，不需要其他檔案。
