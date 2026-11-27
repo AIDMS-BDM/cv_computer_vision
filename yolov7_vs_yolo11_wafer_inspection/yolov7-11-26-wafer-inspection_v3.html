@@ -286,7 +286,7 @@
   <!-- 3 -->
   <section id="tech">
     <h2><span class="num">03</span>模型的技術亮點</h2>
-    <p class="sub">三代模型改進的方向不同：YOLOv7 著重訓練穩定，YOLO11 著重輕量快速、容易導入，YOLO26 著重低延遲、小瑕疵檢出與尺寸量測精度。</p>
+    <p class="sub">三代模型改進的方向不同：YOLOv7 著重訓練穩定，YOLO11 著重輕量快速、容易導入，YOLO26 著重小瑕疵檢出、尺寸量測精度與穩定的檢測時間。</p>
     <div class="grid-3">
       <div class="card v7">
         <h3><span class="tag v7">2022</span>YOLOv7</h3>
@@ -310,9 +310,9 @@
         <h3><span class="tag v26">2025</span>YOLO26</h3>
         <ul class="clean small">
           <li><strong>小瑕疵檢出強化：</strong>針對極小目標加強學習，直接對應晶圓上只有幾個像素的微粒，降低漏檢。</li>
-          <li><strong>輪廓更精準：</strong>瑕疵邊界描得更準，面積、長度量測更可靠；公開基準上輪廓準確度比 YOLO11 最多高 3.7 分。</li>
-          <li><strong>延遲低且穩定：</strong>輸出結果不需額外後處理，檢測時間更可預期，適合機台內嵌與邊緣裝置。</li>
-          <li><strong>沒有 GPU 也能跑：</strong>小模型在一般 CPU 上的推論速度比 YOLO11 最多快 43%。</li>
+          <li><strong>輪廓更精準：</strong>瑕疵邊界描得更準，面積、長度量測更可靠；公開基準上輪廓準確度（Mask mAP）比 YOLO11 高 1.9～3.2 分。</li>
+          <li><strong>處理時間穩定：</strong>輸出結果不需額外後處理，瑕疵再多也不拖慢，容易卡準產線節拍。</li>
+          <li><strong>GPU 上大模型也即時：</strong>準確度最高的 x 版，在 GPU 上每張影像約 16 ms，可做線上全檢。</li>
         </ul>
       </div>
     </div>
